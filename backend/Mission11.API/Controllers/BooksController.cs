@@ -1,0 +1,51 @@
+using BookstoreApp.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookstoreApp.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+// API endpoints for browsing books with paging and sorting.
+public class BooksController : ControllerBase
+{
+    private readonly BookstoreContext _context;
+
+    public BooksController(BookstoreContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetBooks(
+        int pageNum = 1,
+        int pageSize = 5,
+        string sortOrder = "asc")
+    {
+        // Start with the full books query so filters/sorts can be chained.
+        var query = _context.Books.AsQueryable();
+
+        // Sort by title in ascending or descending order.
+        query = sortOrder == "desc"
+            ? query.OrderByDescending(b => b.Title)
+            : query.OrderBy(b => b.Title);
+
+        // Count all rows after sorting/filtering for pagination metadata.
+        var totalBooks = await query.CountAsync();
+
+        // Return only the requested page.
+        var books = await query
+            .Skip((pageNum - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        // Keep payload shape simple for the frontend.
+        return Ok(new
+        {
+            books,
+            totalBooks,
+            pageNum,
+            pageSize
+        });
+    }
+}
