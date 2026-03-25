@@ -20,10 +20,15 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> GetBooks(
         int pageNum = 1,
         int pageSize = 5,
-        string sortOrder = "asc")
+        string sortOrder = "asc",
+        string? category = null)
     {
         // Start with the full books query so filters/sorts can be chained.
         var query = _context.Books.AsQueryable();
+
+        // Filter by category if one is specified.
+        if (!string.IsNullOrEmpty(category))
+            query = query.Where(b => b.Category == category);
 
         // Sort by title in ascending or descending order.
         query = sortOrder == "desc"
@@ -47,5 +52,17 @@ public class BooksController : ControllerBase
             pageNum,
             pageSize
         });
+    }
+
+    // Returns the distinct category names for building the filter sidebar.
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        var categories = await _context.Books
+            .Select(b => b.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+        return Ok(categories);
     }
 }

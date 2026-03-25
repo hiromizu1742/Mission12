@@ -1,8 +1,27 @@
+import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 import BookList from './components/BookList';
+import CartPage from './components/CartPage';
+
+// Wrapper reads URL params so CartPage knows where to send the user back.
+function CartPageWrapper() {
+  const [searchParams] = useSearchParams();
+  const returnPage = Number(searchParams.get('returnPage')) || 1;
+  const returnCategory = searchParams.get('returnCategory') || '';
+  return <CartPage returnPage={returnPage} returnCategory={returnCategory} />;
+}
 
 function App() {
-  // Keep the app shell minimal and delegate UI to BookList.
-  return <BookList />;
+  return (
+    <BrowserRouter>
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<BookList />} />
+          <Route path="/cart" element={<CartPageWrapper />} />
+        </Routes>
+      </CartProvider>
+    </BrowserRouter>
+  );
 }
 
 export default App;
