@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom'
 import { CartProvider } from './context/CartContext';
 import BookList from './components/BookList';
 import CartPage from './components/CartPage';
+import AdminBooks from './components/AdminBooks';
 
 // Wrapper reads URL params so CartPage knows where to send the user back.
 function CartPageWrapper() {
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<BookList />} />
           <Route path="/cart" element={<CartPageWrapper />} />
+          <Route path="/adminbooks" element={<AdminBooks />} />
         </Routes>
       </CartProvider>
     </BrowserRouter>

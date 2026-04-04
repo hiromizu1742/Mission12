@@ -1,4 +1,5 @@
 using BookstoreApp.Data;
+using BookstoreApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,5 +65,40 @@ public class BooksController : ControllerBase
             .OrderBy(c => c)
             .ToListAsync();
         return Ok(categories);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddBook([FromBody] Book book)
+    {
+        _context.Books.Add(book);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(AddBook), new { id = book.BookID }, book);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateBook(int id, [FromBody] Book book)
+    {
+        if (id != book.BookID)
+            return BadRequest();
+
+        var existing = await _context.Books.FindAsync(id);
+        if (existing == null)
+            return NotFound();
+
+        _context.Entry(existing).CurrentValues.SetValues(book);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteBook(int id)
+    {
+        var book = await _context.Books.FindAsync(id);
+        if (book == null)
+            return NotFound();
+
+        _context.Books.Remove(book);
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 }
