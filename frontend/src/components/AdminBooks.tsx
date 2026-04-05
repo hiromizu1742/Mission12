@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiUrl } from '../config/api';
 
 interface Book {
   bookID: number;
@@ -39,7 +40,7 @@ export default function AdminBooks() {
 
   function loadBooks() {
     setLoading(true);
-    fetch('/api/books?pageSize=1000')
+    fetch(apiUrl('/api/books?pageSize=1000'))
       .then(r => r.json())
       .then(data => {
         setBooks(data.books);
@@ -54,7 +55,7 @@ export default function AdminBooks() {
 
   function handleDelete(id: number) {
     if (!confirm('Delete this book?')) return;
-    fetch(`/api/books/${id}`, { method: 'DELETE' }).then(() => {
+    fetch(apiUrl(`/api/books/${id}`), { method: 'DELETE' }).then(() => {
       showAlert('Book deleted successfully.');
       loadBooks();
     });
@@ -62,7 +63,7 @@ export default function AdminBooks() {
 
   function handleEditSave() {
     if (!editingBook) return;
-    fetch(`/api/books/${editingBook.bookID}`, {
+    fetch(apiUrl(`/api/books/${editingBook.bookID}`), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editingBook),
@@ -74,7 +75,7 @@ export default function AdminBooks() {
   }
 
   function handleAdd() {
-    fetch('/api/books', {
+    fetch(apiUrl('/api/books'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newBook),
