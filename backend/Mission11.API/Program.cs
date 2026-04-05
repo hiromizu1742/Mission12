@@ -5,18 +5,23 @@ var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendDevPolicy";
 
 // Register Entity Framework Core with the SQLite database file.
-var dbPath = Path.GetFullPath(
+var publishedDbPath = Path.Combine(builder.Environment.ContentRootPath, "Bookstore.sqlite");
+var localDbPath = Path.GetFullPath(
     Path.Combine(builder.Environment.ContentRootPath, "..", "Bookstore.sqlite"));
+var dbPath = File.Exists(publishedDbPath) ? publishedDbPath : localDbPath;
 builder.Services.AddDbContext<BookstoreContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-// Allow the Vite React frontend to call this API during development.
+// Allow local frontend and Azure Static Web App frontend to call this API.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "https://localhost:5173")
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://localhost:5173",
+                "https://thankful-water-0ae24d31e.1.azurestaticapps.net")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

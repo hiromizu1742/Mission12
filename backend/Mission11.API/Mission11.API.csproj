@@ -21,9 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< Updated upstream
     <None Update="Bookstore.sqlite">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+=======
+    <Content Include="..\Bookstore.sqlite" Link="Bookstore.sqlite">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+>>>>>>> Stashed changes
   </ItemGroup>
 
 </Project>

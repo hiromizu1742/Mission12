@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { apiUrl } from '../config/api';
 
 interface Book {
   bookID: number;
@@ -12,6 +13,11 @@ interface Book {
   category: string;
   pageCount: number;
   price: number;
+}
+
+interface BooksResponse {
+  books: Book[];
+  totalBooks: number;
 }
 
 export default function BookList() {
@@ -34,23 +40,36 @@ export default function BookList() {
 
   // Load categories once on mount.
   useEffect(() => {
-    fetch('/api/books/categories')
+    fetch(apiUrl('/api/books/categories'))
       .then(r => r.json())
-      .then(setCategories);
+      .then(setCategories)
+      .catch(err => {
+        console.error('Failed to load categories:', err);
+        setCategories([]);
+      });
   }, []);
 
   // Reload books whenever paging, sorting, or category changes.
   useEffect(() => {
-    const categoryParam = selectedCategory
-      ? `&category=${encodeURIComponent(selectedCategory)}`
-      : '';
-    fetch(
-      `/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}${categoryParam}`
-    )
+    const query = new URLSearchParams({
+      pageNum: String(pageNum),
+      pageSize: String(pageSize),
+      sortOrder,
+    });
+    if (selectedCategory) {
+      query.set('category', selectedCategory);
+    }
+
+    fetch(apiUrl(`/api/books?${query.toString()}`))
       .then(r => r.json())
-      .then(data => {
+      .then((data: BooksResponse) => {
         setBooks(data.books);
         setTotalBooks(data.totalBooks);
+      })
+      .catch(err => {
+        console.error('Failed to load books:', err);
+        setBooks([]);
+        setTotalBooks(0);
       });
   }, [pageNum, pageSize, sortOrder, selectedCategory]);
 
